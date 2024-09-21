@@ -14,10 +14,11 @@ int main(int argc, char *argv[]) { //без вектора аргументов 
     int lookup_end;
     uint64_t key;
     uint64_t value;
+    uint64_t value1;
     uint64_t lookup_cycles;
     uint64_t start_time; //в примере было больше чем 4 беззнаковых байта поэтому сразу поставил так
     uint64_t current_time; 
-    uint64_t inserted;
+    uint64_t r;
     struct rte_hash *hash; //The hash library uses the Cuckoo Hash algorithm to resolve collisions. (c)
     struct rte_hash_parameters hash_params;
     hash_params.name = "test";
@@ -41,20 +42,26 @@ int main(int argc, char *argv[]) { //без вектора аргументов 
 
     start_time = rte_get_tsc_cycles();
     //генерация и проверка на требуемые параметры
-    inserted = 0;
+    r=0;
     for (int i = 1; i <= INSERTIONS; i++) {
         if (i == DEMANDED_ITERATION) {
             key = DEMANDED_KEY;
             value = DEMANDED_VALUE;
         } else {
-            key = rand();
-            value = rand();
+            for (int i = 0; i < 5; ++i) {
+                r = (r << 15) | (rand() & 0x7FFF);
+            }
+            key = r & 0xFFFFFFFFFFFFFFFFULL;
+            for (int i = 0; i < 5; ++i) {
+                r = (r << 15) | (rand() & 0x7FFF);
+            }
+            value = r & 0xFFFFFFFFFFFFFFFFULL;
         }
         //вставка данных и ключа в хэш таблицу с подсчетом хэша и выкидыванием значения если все забито
         rte_hash_add_key_data(hash, &key, &value); //If the key exists already in the table, this API updates its value with 'data' passed in this API.(c)
 
 
-        inserted++;
+
 
         //отчет
         if (i % INTERVAL == 0) {
@@ -70,11 +77,11 @@ int main(int argc, char *argv[]) { //без вектора аргументов 
     //поиск смысла жизни)
     key = DEMANDED_KEY;
     lookup_start = rte_get_tsc_cycles();
-    ret = rte_hash_lookup_data(hash, &key, (void **)&value);
+    ret = rte_hash_lookup_data(hash, &key, (void **)&value1);
     lookup_end = rte_get_tsc_cycles();
 
     if (ret >= 0) {
-        printf("ключ: %d индекс: %d, значение: %lu\n", DEMANDED_KEY, ret, (uint64_t)value);
+        printf("ключ: %d индекс: %d, данные: %lu\n", DEMANDED_KEY, ret, (uint64_t)value1);
     } else {
         printf("ключ %d не найден в хэш таблице.\n", DEMANDED_KEY);
     }
