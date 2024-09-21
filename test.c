@@ -66,7 +66,7 @@ int main(int argc, char *argv[]) { //без вектора аргументов 
         //отчет
         if (i % INTERVAL == 0) {
             current_time = rte_get_tsc_cycles() - start_time; //количество наносекунд в цикле
-            printf("записано ключей %d из %d, время %lu циклов\n",
+            printf("записано ключей %d из %d, время %lu наносекунд\n",
              i, INSERTIONS, current_time*1000000000/rte_get_tsc_hz()); //поменять потом весь вывод на формат примера!
             
         }
@@ -86,7 +86,7 @@ int main(int argc, char *argv[]) { //без вектора аргументов 
         printf("ключ %d не найден в хэш таблице.\n", DEMANDED_KEY);
     }
     lookup_cycles = lookup_end - lookup_start;
-    printf("время лукапа: %lu циклов\n", (lookup_cycles*1000000000)/rte_get_tsc_hz());
+    printf("время лукапа: %lu наносекунд\n", (lookup_cycles*1000000000)/rte_get_tsc_hz());
 
     //очистка
     rte_hash_free(hash);
