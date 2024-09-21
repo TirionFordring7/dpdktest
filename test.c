@@ -29,13 +29,13 @@ int main(int argc, char *argv[]) { //без вектора аргументов 
     //инициализация DPDK EAL
     ret = rte_eal_init(argc, argv);
     if (ret < 0) {
-        rte_exit(-1, "EAL init error\n");
+        rte_panic("Cannot init EAL\n");
     }
 
     //создание хэш таблицы
     hash = rte_hash_create(&hash_params);
     if (hash == NULL) {
-        rte_exit(-1, "failed to create hash table\n");
+        rte_panic("Failed to create hash table\n");
     }
 
     start_time = rte_get_tsc_cycles();
@@ -57,7 +57,7 @@ int main(int argc, char *argv[]) { //без вектора аргументов 
 
         //отчет
         if (i % INTERVAL == 0) {
-            current_time = rte_get_tsc_cycles() - start_time;
+            current_time = ((rte_get_tsc_cycles() - start_time)*1000000000)/rte_get_tsc_hz(); //количество наносекунд в цикле
             printf("записано ключей %d из %d, время %lu циклов\n", i, INSERTIONS, current_time); //поменять потом весь вывод на формат примера!
             
         }
@@ -78,7 +78,7 @@ int main(int argc, char *argv[]) { //без вектора аргументов 
         printf("ключ %d не найден в хэш таблице.\n", DEMANDED_KEY);
     }
 
-    printf("время лукапа: %d циклов\n", lookup_end - lookup_start);
+    printf("время лукапа: %lu циклов\n", ((lookup_end - lookup_start)*1000000000)/rte_get_tsc_hz());
 
     //очистка
     rte_hash_free(hash);
