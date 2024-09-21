@@ -1,12 +1,12 @@
 #include <rte_hash.h>
 #include <rte_hash_crc.h>
 
-#define ENTRIES 1000
-#define INSERTIONS 16000
-#define INTERVAL 1000
-#define DEMANDED_ITERATION 123
+#define ENTRIES 1000000
+#define INSERTIONS 16000000
+#define INTERVAL 1000000
+#define DEMANDED_ITERATION 123456
 #define DEMANDED_KEY 42
-#define DEMANDED_VALUE 123
+#define DEMANDED_VALUE 123456
 
 int main(int argc, char *argv[]) { //без вектора аргументов инициализация EAL не работает
     int ret;
@@ -65,8 +65,7 @@ int main(int argc, char *argv[]) { //без вектора аргументов 
         }
     }
 
-
-    printf("количество элементов в хэш таблице: %lu\n", inserted);
+    printf("количество элементов в хэш таблице: %u\n", rte_hash_count(hash));
 
     //поиск смысла жизни)
     key = DEMANDED_KEY;
