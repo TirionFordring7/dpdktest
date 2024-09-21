@@ -14,7 +14,6 @@ int main(int argc, char *argv[]) { //без вектора аргументов 
     int lookup_end;
     uint64_t key;
     uint64_t value;
-    uint64_t value1;
     uint64_t lookup_cycles;
     uint64_t start_time; //в примере было больше чем 4 беззнаковых байта поэтому сразу поставил так
     uint64_t current_time; 
@@ -58,7 +57,7 @@ int main(int argc, char *argv[]) { //без вектора аргументов 
             value = r & 0xFFFFFFFFFFFFFFFFULL;
         }
         //вставка данных и ключа в хэш таблицу с подсчетом хэша и выкидыванием значения если все забито
-        rte_hash_add_key_data(hash, &key, &value); //If the key exists already in the table, this API updates its value with 'data' passed in this API.(c)
+        rte_hash_add_key_data(hash, &key, (void *)value); //If the key exists already in the table, this API updates its value with 'data' passed in this API.(c)
 
 
 
@@ -77,11 +76,11 @@ int main(int argc, char *argv[]) { //без вектора аргументов 
     //поиск смысла жизни)
     key = DEMANDED_KEY;
     lookup_start = rte_get_tsc_cycles();
-    ret = rte_hash_lookup_data(hash, &key, (void **)&value1);
+    ret = rte_hash_lookup_data(hash, &key, (void **)&value);
     lookup_end = rte_get_tsc_cycles();
 
     if (ret >= 0) {
-        printf("ключ: %d индекс: %d, данные: %lu\n", DEMANDED_KEY, ret, (uint64_t)value1);
+        printf("ключ: %ld индекс: %d, данные: %ld\n", key, ret, (uint64_t)value);
     } else {
         printf("ключ %d не найден в хэш таблице.\n", DEMANDED_KEY);
     }
