@@ -10,35 +10,39 @@ HUGE_PAGES = 88
 all:
 	@echo "Настройка больших страниц"
 	@sudo sysctl -w vm.nr_hugepages=$(HUGE_PAGES)
-	@sudo mkdir ./hpm
-	@sudo mount -t hugetlbfs pagesize=2M ./hpm
+	@sudo mkdir ./test/hpm
+	@sudo mount -t hugetlbfs pagesize=2M ./test/hpm
 	@echo "Большие страницы настроены"
 	@echo "Скачивание архива DPDK"
-	@wget $(DPDK_URL)
+	@cd test;\
+	wget $(DPDK_URL)
 	@echo "Архив скачан"
 	@echo "Проверка хэша"
-	@ACTUAL_MD5="$$(md5sum $(DPDK_TAR) | awk '{print $$1}')" && \
+	@cd test;\
+	ACTUAL_MD5="$$(md5sum $(DPDK_TAR) | awk '{print $$1}')" && \
 	if [ "$$ACTUAL_MD5" != '$(DPDK_MD5)' ]; then echo "Хэш не совпадает"; \
 		exit 1; \
 	fi
 	@echo "Хэш совпадает"
 	@echo "Распаковка архива"
-	@tar xf $(DPDK_TAR)
+	@cd test;\
+	tar xf $(DPDK_TAR)
 	@echo "Архив распакован"
 	@echo "Сборка DPDK"
-	@cd $(DPDK_DIR);\
+	@cd test/$(DPDK_DIR);\
 	meson setup build && cd build && ninja && sudo meson install && sudo ldconfig
 	@echo "DPDK собран"
 	@echo "Сборка программы"
-	@$(CC) $(CFLAGS) -o test test.c $(LDFLAGS)
+	@cd test;\
+	$(CC) $(CFLAGS) -o test test.c $(LDFLAGS)
 	@echo "Исполняемый файл создан"
 
 run:
-	@sudo ./test
+	sudo ./test/test
 
 clean:
-	@sudo umount ./hpm
-	@rm -f $(DPDK_TAR)
-	@rm -rf $(DPDK_DIR)
-	@rm -rf ./hpm
-	@rm -f test
+	@sudo umount ./test/hpm
+	@rm -f ./test/$(DPDK_TAR)
+	@rm -rf ./test/$(DPDK_DIR)
+	@rm -rf ./test/hpm
+	@rm -f ./test/test
